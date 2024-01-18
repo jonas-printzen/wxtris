@@ -16,7 +16,9 @@ class GUI : public wxApp {
   void operator = ( const GUI& ) = delete;
 public:
 
-  GUI( chars_t name );
+  static constexpr const unsigned DEFAULT_STYLE = wxDEFAULT_FRAME_STYLE;
+
+  GUI( chars_t name, unsigned style=DEFAULT_STYLE );
   ~GUI();
 
 protected:
@@ -84,6 +86,7 @@ protected:
   wxStatusBar *_statusbar=nullptr;
   std::map<string,wxMenu*> _menus;
   string _name;
+  unsigned _frame_style;
 };
 
 } // namespace trix

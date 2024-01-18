@@ -14,7 +14,6 @@ public:
     // Let base initialize
     if( GUI::OnInit() ) {
       std::cout << "WXTris::OnInit() ..." << std::endl;
-      SetClientSize( 1024,768 );
 
       MenuItem( "Game", wxID_ANY, "Start", &WXTris::OnMenu,this );
       MenuItem( "Game", wxID_ANY, "Quit", &WXTris::OnMenu,this );
@@ -28,11 +27,12 @@ public:
       buttons->Button("Hopp", &WXTris::OnButt, this );
 
       wxSizer *psz = new wxBoxSizer(wxVERTICAL);
-      psz->Add( blocks, 1, wxEXPAND | wxALL, 10 );
+      psz->Add( new wxPanel, 1);
+      psz->Add( blocks, 0, wxALIGN_CENTER | wxALL, 10 );
+      psz->Add( new wxPanel, 1);
       psz->Add( buttons, 0, wxBOTTOM|wxRIGHT, Buttons::MARGIN );
 
       SetSizerAndFit( psz );
-
       Show(true);
       std::cout << "WXTris::OnInit() done!" << std::endl;
       return true;

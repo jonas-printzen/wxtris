@@ -34,6 +34,8 @@ public:
 protected:
   void OnPaint( wxPaintEvent &evt );
 
+  void OnMouse( wxMouseEvent &evt );
+
   wxRect GetBlocksRect();
 
 private:

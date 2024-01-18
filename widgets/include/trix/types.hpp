@@ -32,6 +32,14 @@ inline int operator | (int i, wxDirection d) {
   return i | (int)d;
 }
 
+inline int operator | (int i, wxAlignment d) {
+  return i | (int)d;
+}
+
+inline int operator | (int i, wxStretch d) {
+  return i | (int)d;
+}
+
 } // namespace trix
 
 #endif  // TRIX_TYPES_HDR

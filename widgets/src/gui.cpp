@@ -3,8 +3,9 @@
 
 namespace trix {
 
-GUI::GUI( chars_t name ) : _name(name) {
+GUI::GUI( chars_t name, unsigned style ) : _name(name) {
   std::cout << "GUI::GUI()" << std::endl;
+  _frame_style = style;
 }
 
 GUI::~GUI() {
@@ -53,7 +54,7 @@ wxMenuItem& GUI::MenuItem( int id ) {
 bool GUI::OnInit() {
   if( wxApp::OnInit() ) {
     std::cout << "GUI::OnInit(): wxApp::OnInit() OK ..." << std::endl;
-    _frame = new wxFrame( nullptr, wxID_ANY, _name.data() );
+    _frame = new wxFrame( nullptr, wxID_ANY, _name.data(), wxDefaultPosition, wxDefaultSize, _frame_style );
     // TODO: Add more if generic
     std::cout << "GUI::OnInit(): done!" << std::endl;
     return true;
