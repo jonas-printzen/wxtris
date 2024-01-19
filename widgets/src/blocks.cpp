@@ -8,6 +8,36 @@
 
 namespace trix {
 
+std::array<Blocks::attr_t,20> Blocks::_attrs {
+  Blocks::attr_t{ wxPen(wxColor(140,140,140),3),  wxBrush(wxColor(115,115,115)) },
+  Blocks::attr_t{ wxPen(wxColor(255,255,255),3),  wxBrush(wxColor(245,245,245)) },
+  //RED's
+  Blocks::attr_t{ wxPen(wxColor(130,20,20),3),    wxBrush(wxColor(100,10,10)) },
+  Blocks::attr_t{ wxPen(wxColor(200,50,50),3),    wxBrush(wxColor(180,10,10)) },
+  Blocks::attr_t{ wxPen(wxColor(250,120,120),3),  wxBrush(wxColor(250,75,75)) },
+  //YELLOW's
+  Blocks::attr_t{ wxPen(wxColor(130,130,20),3),   wxBrush(wxColor(100,100,10)) },
+  Blocks::attr_t{ wxPen(wxColor(200,200,50),3),   wxBrush(wxColor(180,180,10)) },
+  Blocks::attr_t{ wxPen(wxColor(250,250,120),3),  wxBrush(wxColor(250,250,75)) },
+  //GREEN's
+  Blocks::attr_t{ wxPen(wxColor(20,130,20),3),    wxBrush(wxColor(10,100,10)) },
+  Blocks::attr_t{ wxPen(wxColor(50,200,50),3),    wxBrush(wxColor(10,180,10)) },
+  Blocks::attr_t{ wxPen(wxColor(120,250,120),3),  wxBrush(wxColor(75,250,75)) },
+  //CYAN's
+  Blocks::attr_t{ wxPen(wxColor(20,120,120),3),   wxBrush(wxColor(10,100,100)) },
+  Blocks::attr_t{ wxPen(wxColor(50,190,190),3),   wxBrush(wxColor(10,170,170)) },
+  Blocks::attr_t{ wxPen(wxColor(120,240,240),3),  wxBrush(wxColor(75,245,245)) },
+  //BLUE's
+  Blocks::attr_t{ wxPen(wxColor(20,20,130),3),    wxBrush(wxColor(10,10,100)) },
+  Blocks::attr_t{ wxPen(wxColor(50,50,200),3),    wxBrush(wxColor(10,10,180)) },
+  Blocks::attr_t{ wxPen(wxColor(120,120,250),3),  wxBrush(wxColor(75,75,250)) },
+  //MAGENTA's
+  Blocks::attr_t{ wxPen(wxColor(125,20,125),3),   wxBrush(wxColor(100,10,100)) },
+  Blocks::attr_t{ wxPen(wxColor(185,50,185),3),    wxBrush(wxColor(180,10,180)) },
+  Blocks::attr_t{ wxPen(wxColor(250,120,250),3),  wxBrush(wxColor(250,75,250)) },
+};
+
+
 Blocks::Blocks( wxWindow *parent, wxSize bsz, int side ) 
   : wxPanel(parent), _bsz(bsz), _side(side), cells(bsz.x,bsz.y) {
 
@@ -41,19 +71,21 @@ void Blocks::OnPaint( wxPaintEvent &evt ) {
   pgc->SetPen( wxColor(10,10,40) );
   pgc->DrawRectangle(rec.x, rec.y, rec.GetWidth()+1, rec.GetHeight()+1 );
 
-  pgc->SetPen(*wxLIGHT_GREY_PEN);
-  pgc->SetBrush( *wxBLUE_BRUSH );
-
   rec.SetSize( wxSize(_side,_side) );
-  rec.Inflate(-2,-2);
+  rec.Inflate(-1,-1);
 
   wxPoint mousePos = ScreenToClient( wxGetMousePosition() );
   wxRect mouseRec;
 
   for( auto [x,y] : Range2<int>( _bsz.x, _bsz.y ) ) {
     rec.SetPosition( wxPoint(1+MARGIN/2+x*_side, 1+MARGIN/2+y*_side) );
-    if( cells(x,y) ) {
-      pgc->DrawRectangle(rec.x, rec.y, rec.GetWidth(), rec.GetHeight() );
+    size_t aid = cells(x,y);
+    if( aid ) {
+      aid = std::min(aid,_attrs.size()) - 1;
+      attr_t &attr = _attrs[aid];
+      pgc->SetPen( attr.pen );
+      pgc->SetBrush( attr.brush );
+      pgc->DrawRoundedRectangle(rec.x, rec.y, rec.GetWidth(), rec.GetHeight(), 5 );
     }
     if( rec.Contains(mousePos) ) {
       mouseRec = rec;
@@ -61,6 +93,7 @@ void Blocks::OnPaint( wxPaintEvent &evt ) {
   }
 
   if( mouseRec.x ) {
+    pgc->SetPen( *wxLIGHT_GREY_PEN );
     pgc->SetBrush( *wxTRANSPARENT_BRUSH );
     pgc->DrawRectangle(mouseRec.x, mouseRec.y, mouseRec.GetWidth(), mouseRec.GetHeight() );
   }
