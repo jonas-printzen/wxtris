@@ -35,6 +35,12 @@ public:
     return range_t{ {0,0}, {_cols,_rows} };
   }
 
+  inline void clear( value_type val ) {
+    for( auto &cell : _cells ) {
+      cell = val;
+    }
+  }
+
 #ifndef TRIX_TEST
 private:
 #endif

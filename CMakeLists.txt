@@ -10,7 +10,7 @@ include(cmake/${CMAKE_BUILD_TYPE}.cmake)
 enable_testing()
 
 add_subdirectory(widgets)
-add_subdirectory(src)
+add_subdirectory(wxtris)
 
 #==== GENERATING FILE FOR CLANGD IN CODIUM =====================
 # Have to include at least one of the deps-files...
