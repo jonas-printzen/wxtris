@@ -14,6 +14,9 @@ MainPanel::MainPanel( wxFrame *frame ) : wxPanel(frame) {
   preview = new Blocks( this, {4,4}, 32 );
   rightSz->Add( preview, 0, wxALL, 5 );
 
+  buttons = new Buttons( this, {100,64}, wxVERTICAL );
+  rightSz->Add( buttons, 0, wxALL, 5 );
+
   SetSizerAndFit( topSz );
 }
 

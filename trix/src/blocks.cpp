@@ -1,5 +1,6 @@
 #include <trix/blocks.hpp>
 #include <trix/ranges.hpp>
+#include <trix/rotate.hpp>
 
 #include <wx/event.h>
 #include <wx/graphics.h>
@@ -37,9 +38,65 @@ std::array<Blocks::attr_t,20> Blocks::_attrs {
   Blocks::attr_t{ wxPen(wxColor(250,120,250),3),  wxBrush(wxColor(250,75,250)) },
 };
 
+using tetra_t = std::array<int8_t,4*4>;
+
+static std::array<tetra_t,7> tetras {
+  tetra_t {
+    0,1,0,0,
+    0,1,0,0,
+    0,1,0,0,
+    0,1,0,0
+  },
+  tetra_t {
+    0,0,0,0,
+    0,0,1,0,
+    0,0,1,0,
+    0,1,1,0
+  },
+  tetra_t {
+    0,0,0,0,
+    0,1,0,0,
+    0,1,0,0,
+    0,1,1,0
+  },
+  tetra_t {
+    0,0,0,0,
+    0,1,1,0,
+    0,1,1,0,
+    0,0,0,0
+  },
+  tetra_t {
+    0,0,0,0,
+    0,1,1,0,
+    1,1,0,0,
+    0,0,0,0
+  },
+  tetra_t {
+    0,0,0,0,
+    1,1,1,0,
+    0,1,0,0,
+    0,0,0,0
+  },
+  tetra_t {
+    0,0,0,0,
+    1,1,0,0,
+    0,1,1,0,
+    0,0,0,0
+  },
+};
+
+static std::array<Blocks::color_t,7> tcolors {
+  Blocks::CYAN,
+  Blocks::BLUE,
+  Blocks::DARK_YELLOW,
+  Blocks::YELLOW,
+  Blocks::GREEN,
+  Blocks::MAGENTA,
+  Blocks::RED,
+};
 
 Blocks::Blocks( wxWindow *parent, wxSize bsz, int side ) 
-  : wxPanel(parent), _bsz(bsz), _side(side), cells(bsz.x,bsz.y) {
+  : wxPanel(parent), _bsz(bsz), _side(side), cells(bsz.x,bsz.y), pinned(bsz.x,bsz.y) {
 
   SetBackgroundStyle(wxBG_STYLE_PAINT);
   SetBackgroundColour(wxColor(20,20,32));
@@ -56,6 +113,27 @@ Blocks::Blocks( wxWindow *parent, wxSize bsz, int side )
     psz->Add(this,5, wxEXPAND |wxALL, MARGIN);
   }
 }
+
+bool Blocks::Tetro( wxPoint p, tetro_t tet , rot_t rot ) {
+  // Start by resetting to pinned
+  cells = pinned;
+
+  int tid = std::min((size_t)tet, tetras.size()-1);
+
+  auto &shape = tetras[tid];
+  for( auto [x,y] : Range2( {0,0}, {4,4} ) ) {
+    // TODO: Rotate
+    auto [rx,ry] = Rotate<4>( {x,y}, rot );
+    if( shape[4*ry+rx] ) cells( p.x+x, p.y+y ) = tcolors[tid];
+  }
+
+  return true;
+}
+
+void Blocks::Pin() {
+  pinned = cells;
+}
+
 
 void Blocks::OnPaint( wxPaintEvent &evt ) {
   wxAutoBufferedPaintDC dc(this);

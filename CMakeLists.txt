@@ -9,7 +9,7 @@ include(cmake/${CMAKE_BUILD_TYPE}.cmake)
 
 enable_testing()
 
-add_subdirectory(widgets)
+add_subdirectory(trix)
 add_subdirectory(wxtris)
 
 #==== GENERATING FILE FOR CLANGD IN CODIUM =====================

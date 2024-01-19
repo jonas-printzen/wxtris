@@ -20,8 +20,8 @@ public:
    * @param target The binding for event-callback
    */
   template <class B=wxButton>
-  B& Button( chars_t label, auto&&... target ) {
-    return XButton(label,0,std::forward<decltype(target)>(target)...);
+  B& Button( chars_t label, wxWindowID id, auto&&... target ) {
+    return XButton(label,id,0,std::forward<decltype(target)>(target)...);
   }
 
   /** @brief Add a styled button 
@@ -30,8 +30,8 @@ public:
    * @param target The binding for event-callback
    */
   template <class B=wxButton>
-  B& XButton( chars_t label, long style, auto&&... target ) {
-    B *pButton = new B(this,wxID_ANY,label.data(),wxDefaultPosition, _sz, style);
+  B& XButton( chars_t label, wxWindowID id, long style, auto&&... target ) {
+    B *pButton = new B(this,id,label.data(),wxDefaultPosition, _sz, style);
     wxSizer *psz = GetSizer();
     if( nullptr != psz ) {
       psz->Add(pButton,0, wxTOP|wxLEFT, MARGIN);

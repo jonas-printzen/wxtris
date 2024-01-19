@@ -3,6 +3,7 @@
 
 #include <trix/types.hpp>
 #include <trix/vecs.hpp>
+#include <trix/rotate.hpp>
 #include <wx/wx.h>
 
 #include <array>
@@ -30,6 +31,18 @@ public:
     DARK_MAGENTA, MAGENTA, LIGHT_MAGENTA,
   };
 
+  using rot_t = rotate_t;
+
+  enum tetro_t {
+    I_TETRO=0,
+    J_TETRO,
+    L_TETRO,
+    O_TETRO,
+    S_TETRO,
+    Z_TETRO,
+    T_TETRO
+  };
+
   static constexpr const int DEFAULT_SIDE = 10;
   static constexpr const int MARGIN = 10;
 
@@ -43,10 +56,33 @@ public:
    */
   Blocks( wxWindow *parent, wxSize bsz, int side=DEFAULT_SIDE );
 
-  Mat<color_t> cells;
+  /** @brief Populate with given tetro _t
+   *
+   * Given the point, variant and rotation, attempt to place a tetro 
+   * in the grid. If the tetro will not fit or collides with previous
+   * content, fail and return false.
+   *
+   * @note The color of the tetro is implicit
+   *
+   * @param p   The point at which to put the tetro
+   * @param tet The tetro-variant
+   * @param rot The rotation
+   * @return Returns 'true' if the tetro was placed without problem.
+   */
+  bool Tetro( wxPoint p, tetro_t tet , rot_t rot );
 
+  /** @brief Pin the cells 
+   *
+   * The current state of the cells-matrix is pinned and will be used
+   * as base the next time Tetro() is called.
+   */
+  void Pin();
 
+  Mat<color_t> cells;   ///< The cells shown
 protected:
+  Mat<color_t> pinned;  ///< The cells pinned
+
+
   void OnPaint( wxPaintEvent &evt );
 
   void OnMouse( wxMouseEvent &evt );

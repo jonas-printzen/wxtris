@@ -4,17 +4,28 @@
 #include <random>
 
 static std::mt19937 rnd_gen;
-static std::uniform_int_distribution<int> rnd_range(1,19);
-
+static std::uniform_int_distribution<int> rnd_tetro(0,6);
+static std::uniform_int_distribution<int> rnd_rot(0,3);
 
 namespace wxtris {
 using namespace trix;
 
-enum manu_ids {
+inline std::ostream& operator << ( std::ostream&out, rotate_t rot ) {
+  switch( rot ) {
+  case SOUTH:  out << "SOUTH"; break;
+  case WEST:   out << "WEST"; break;
+  case EAST:  out << "EAST"; break;
+  case NORTH:  out << "NORTH"; break;
+  }
+  return out;
+}
+
+enum menu_ids {
   MENU_START=wxID_HIGHEST+10,
   MENU_COLORS,
   MENU_CLEAR,
-  MENU_PREVIEW
+  MENU_PREVIEW,
+  MENU_ROTATE
 };
 
 WXTris::WXTris() : GUI("WXTris") {}
@@ -33,8 +44,11 @@ bool WXTris::OnInit() {
 
     panel = new MainPanel(_frame);
 
+    panel->buttons->Button( "Preview", MENU_PREVIEW, &WXTris::OnMenu, this );
+    panel->buttons->Button( "Rotate", MENU_ROTATE, &WXTris::OnMenu, this );
+
     // To let panel decide main window size
-    wxSizer *psz = new wxBoxSizer(wxVERTICAL);
+    wxSizer *psz = new wxBoxSizer(wxHORIZONTAL);
     psz->Add(panel,1);
     SetSizerAndFit( psz );
 
@@ -62,7 +76,16 @@ void WXTris::OnMenu( wxCommandEvent&evt ) {
       ShowColors();
       break;
     case MENU_PREVIEW:
-      ShowPreview();
+      {
+        last_tetro = tetro_t(rnd_tetro(rnd_gen));
+        // last_rot = rot_t(rnd_rot(rnd_gen));
+        last_rot = SOUTH;
+        ShowPreview(last_tetro,last_rot);
+      }
+      break;
+    case MENU_ROTATE:
+      last_rot = rot_t((last_rot+1)%4);
+      ShowPreview( last_tetro, last_rot );
       break;
     case wxID_EXIT:
       _frame->Close();
@@ -106,16 +129,15 @@ void WXTris::ShowColors() {
   }
 }
 
-void WXTris::ShowPreview() {
+void WXTris::ShowPreview( tetro_t tet, rot_t rot ) {
   if( panel && panel->preview ) {
-    int color = rnd_range(rnd_gen);
-    panel->preview->cells(1,1) = Blocks::color_t(color);
+    std::cout << "WXTris::ShowPreview(): rotated " << rotate_t(rot) << std::endl;
+    panel->preview->Tetro( {0,0}, last_tetro, Blocks::rot_t(rot) );
     _frame->Refresh();
   } else {
     std::cout << "WXTris::ShowPreview(): Widgets not initialized!" << std::endl;
   }
 }
-
 
 } // namespace wxtris
 

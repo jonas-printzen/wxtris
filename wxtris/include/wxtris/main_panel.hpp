@@ -3,6 +3,7 @@
 
 #include <trix/types.hpp>
 #include <trix/blocks.hpp>
+#include <trix/buttons.hpp>
 
 namespace wxtris {
 
@@ -20,8 +21,9 @@ public:
   /** @brief Designed to be main-panel in frame */
   MainPanel( wxFrame *frame );
 
-  Blocks *blocks;     ///< The main block for the game
-  Blocks *preview;    ///< Preview of next item
+  Blocks *blocks=nullptr;     ///< The main block for the game
+  Blocks *preview=nullptr;    ///< Preview of next item
+  Buttons *buttons=nullptr;
 };
 
 } // namespace wxtris

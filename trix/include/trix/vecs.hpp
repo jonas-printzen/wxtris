@@ -41,6 +41,10 @@ public:
     }
   }
 
+  inline void operator = ( const Mat &other ) {
+    _cells = other._cells;
+  }
+
 #ifndef TRIX_TEST
 private:
 #endif
