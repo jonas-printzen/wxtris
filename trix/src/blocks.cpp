@@ -41,47 +41,47 @@ std::array<Blocks::attr_t,20> Blocks::_attrs {
 using tetra_t = std::array<int8_t,4*4>;
 
 static std::array<tetra_t,7> tetras {
-  tetra_t {
+  tetra_t { // I_TETRO
     0,1,0,0,
     0,1,0,0,
     0,1,0,0,
     0,1,0,0
   },
-  tetra_t {
-    0,0,0,0,
-    0,0,1,0,
-    0,0,1,0,
-    0,1,1,0
-  },
-  tetra_t {
-    0,0,0,0,
+  tetra_t { // J_TETRO
     0,1,0,0,
     0,1,0,0,
-    0,1,1,0
+    1,1,0,0,
+    0,0,0,0,
   },
-  tetra_t {
+  tetra_t { // L_TETRO
+    0,1,0,0,
+    0,1,0,0,
+    0,1,1,0,
+    0,0,0,0,
+  },
+  tetra_t { // O_TETRO
     0,0,0,0,
     0,1,1,0,
     0,1,1,0,
     0,0,0,0
   },
-  tetra_t {
+  tetra_t { // S_TETRO
     0,0,0,0,
     0,1,1,0,
     1,1,0,0,
-    0,0,0,0
+    0,0,0,0,
   },
-  tetra_t {
+  tetra_t { // Z_TETRO
+    0,0,0,0,
+    1,1,0,0,
+    0,1,1,0,
+    0,0,0,0,
+  },
+  tetra_t { // T_TETRO
     0,0,0,0,
     1,1,1,0,
     0,1,0,0,
-    0,0,0,0
-  },
-  tetra_t {
     0,0,0,0,
-    1,1,0,0,
-    0,1,1,0,
-    0,0,0,0
   },
 };
 
@@ -91,8 +91,8 @@ static std::array<Blocks::color_t,7> tcolors {
   Blocks::DARK_YELLOW,
   Blocks::YELLOW,
   Blocks::GREEN,
-  Blocks::MAGENTA,
   Blocks::RED,
+  Blocks::MAGENTA,
 };
 
 Blocks::Blocks( wxWindow *parent, wxSize bsz, int side ) 
@@ -121,11 +121,28 @@ bool Blocks::Tetro( wxPoint p, tetro_t tet , rot_t rot ) {
   int tid = std::min((size_t)tet, tetras.size()-1);
 
   auto &shape = tetras[tid];
-  for( auto [x,y] : Range2( {0,0}, {4,4} ) ) {
-    // TODO: Rotate
-    auto [rx,ry] = Rotate<4>( {x,y}, rot );
-    if( shape[4*ry+rx] ) cells( p.x+x, p.y+y ) = tcolors[tid];
+
+  // We group to handle symmetry 
+  switch( tet ) {
+    case I_TETRO:
+      rot = rot_t((rot & 1)?3:0); // Cheat for better rotation
+    case O_TETRO:
+      for( auto [x,y] : Range2( {0,0}, {4,4} ) ) {
+        auto [rx,ry] = Rotate<4>( {x,y}, rot );
+        if( shape[4*ry+rx] ) cells( p.x+x, p.y+y ) = tcolors[tid];
+      }
+      break;
+    case J_TETRO:
+    case L_TETRO:
+    case S_TETRO:
+    case Z_TETRO:
+    case T_TETRO:
+      for( auto [x,y] : Range2( {0,0}, {3,3} ) ) {
+        auto [rx,ry] = Rotate<3>( {x,y}, rot );
+        if( shape[4*ry+rx] ) cells( p.x+x, p.y+y ) = tcolors[tid];
+      }
   }
+
 
   return true;
 }
