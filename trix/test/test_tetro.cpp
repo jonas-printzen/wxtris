@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <trix/rotate.hpp>
+#include <trix/tetro.hpp>
 using namespace trix;
 
-TEST( Rotate, 4by4 ) {
+TEST( Tetro, Rot4by4 ) {
   int x=0,y=0;
 
   // No rotation
@@ -43,7 +43,7 @@ TEST( Rotate, 4by4 ) {
 }
 
 
-TEST( Rotate, 3by3 ) {
+TEST( Tetro, Rot3by3 ) {
   int x=0, y=0;
 
   // No rotation

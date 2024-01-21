@@ -5,22 +5,25 @@
 #include <trix/gui.hpp>
 #include <wxtris/main_panel.hpp>
 
+#include <map>
+
 namespace wxtris {
 using namespace trix;
 
 class WXTris : public GUI {
 public:
   using GUI::MenuItem;
-  using tetro_t = Blocks::tetro_t;
   using rot_t = rotate_t;
 
   WXTris();
 
   bool OnInit() override;
 
-  void OnButt (wxCommandEvent &evt );
+  void OnCmd( wxCommandEvent&evt );
 
-  void OnMenu( wxCommandEvent&evt );
+  int FilterEvent( wxEvent &evt ) override;
+
+  bool DoKey( wxKeyEvent&evt );
 
 protected:
 
@@ -32,8 +35,13 @@ protected:
 private:
   MainPanel *panel;
 
-  tetro_t last_tetro=Blocks::O_TETRO;
+  wxPoint show_point={0,0};
+  tetro_t show_tetro=NO_TETRO;
+  rot_t   show_rot=SOUTH;
+
+  tetro_t last_tetro=NO_TETRO;
   rot_t   last_rot=SOUTH;
+  bool _running=true;
 };
 
 } // namespace wxtris

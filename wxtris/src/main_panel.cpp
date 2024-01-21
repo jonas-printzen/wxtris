@@ -2,10 +2,11 @@
 
 namespace wxtris {
 
-MainPanel::MainPanel( wxFrame *frame ) : wxPanel(frame) {
+MainPanel::MainPanel( wxFrame *frame ) 
+  : wxPanel(frame,wxID_ANY, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS) {
   wxSizer *topSz = new wxBoxSizer( wxHORIZONTAL );
 
-  blocks = new Blocks( this, {10,20}, 42 );
+  blocks = new Blocks( this, {10,21}, 42 );
   topSz->Add( blocks, 0, wxALIGN_CENTER | wxALL, 10 );
 
   wxSizer *rightSz = new wxBoxSizer( wxVERTICAL );
@@ -14,7 +15,7 @@ MainPanel::MainPanel( wxFrame *frame ) : wxPanel(frame) {
   preview = new Blocks( this, {4,4}, 32 );
   rightSz->Add( preview, 0, wxALL, 5 );
 
-  buttons = new Buttons( this, {100,64}, wxVERTICAL );
+  buttons = new Buttons( this, {100,-1}, wxVERTICAL );
   rightSz->Add( buttons, 0, wxALL, 5 );
 
   SetSizerAndFit( topSz );

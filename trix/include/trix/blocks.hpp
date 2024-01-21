@@ -3,10 +3,8 @@
 
 #include <trix/types.hpp>
 #include <trix/vecs.hpp>
-#include <trix/rotate.hpp>
+#include <trix/tetro.hpp>
 #include <wx/wx.h>
-
-#include <array>
 
 namespace trix {
 
@@ -20,28 +18,16 @@ namespace trix {
 class Blocks : public wxPanel {
 public:
 
-  enum color_t {
-    NONE = 0,
-    GRAY,WHITE,
-    DARK_RED,     RED,     LIGHT_RED,
-    DARK_YELLOW,  YELLOW,  LIGHT_YELLOW,
-    DARK_GREEN,   GREEN,   LIGHT_GREEN,
-    DARK_CYAN,    CYAN,    LIGHT_CYAN,
-    DARK_BLUE,    BLUE,    LIGHT_BLUE,
-    DARK_MAGENTA, MAGENTA, LIGHT_MAGENTA,
-  };
 
   using rot_t = rotate_t;
 
-  enum tetro_t {
-    I_TETRO=0,
-    J_TETRO,
-    L_TETRO,
-    O_TETRO,
-    S_TETRO,
-    Z_TETRO,
-    T_TETRO
+  /** @brief Where to draw blocks */
+  struct xy_t { 
+    int16_t x=0;
+    int16_t y=0;
   };
+
+  using points_t = std::vector<xy_t>;
 
   static constexpr const int DEFAULT_SIDE = 10;
   static constexpr const int MARGIN = 10;
@@ -69,7 +55,30 @@ public:
    * @param rot The rotation
    * @return Returns 'true' if the tetro was placed without problem.
    */
-  bool Tetro( wxPoint p, tetro_t tet , rot_t rot );
+  hit_t Tetro( wxPoint p, tetro_t tet , rot_t rot );
+
+  /** @brief Get the points of the tetro 
+   *
+   * This will provide the points included in the current tetro.
+   *
+   * @param p   The point at which to check
+   * @param tet The tetro-variant
+   * @param rot The rotation
+   *
+   * @return The points of the placed and rotated tetro
+   */
+  points_t Points( wxPoint p, tetro_t tet , rot_t rot );
+
+  /** @brief Check for collision 
+   *
+   * Call this to check if drawing given tetro will collide with anything.
+   *
+   * @param p   The point at which to check
+   * @param tet The tetro-variant
+   * @param rot The rotation
+   * @return Returns HIT_NONE it OK to draw
+   */
+  hit_t Check( const points_t &points );
 
   /** @brief Pin the cells 
    *
@@ -83,22 +92,17 @@ protected:
   Mat<color_t> pinned;  ///< The cells pinned
 
 
+  /** @brief Paint this custom view */
   void OnPaint( wxPaintEvent &evt );
 
+  /** @brief React to mouse over */
   void OnMouse( wxMouseEvent &evt );
 
   wxRect GetBlocksRect();
 
 private:
-  wxSize  _bsz;
-  int     _side;
-
-  struct attr_t {
-    wxPen   pen;
-    wxBrush brush;
-  };
-
-  static std::array<attr_t,20> _attrs;
+  wxSize  _bsz;   ///< Size of the block-grid to display
+  int     _side;  ///< Pixel-size of each block
 };
 
 } // namespace trix
