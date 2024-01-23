@@ -1,12 +1,6 @@
 #include <trix/gui.hpp>
 #include <wxtris/app.hpp>
 
-#include <random>
-
-static std::mt19937 rnd_gen;
-static std::uniform_int_distribution<int> rnd_tetro(0,6);
-static std::uniform_int_distribution<int> rnd_rot(0,3);
-
 namespace wxtris {
 using namespace trix;
 
@@ -18,7 +12,7 @@ enum menu_ids {
   CMD_ROTATE
 };
 
-WXTris::WXTris() : GUI("WXTris") {}
+WXTris::WXTris() : GUI("WXTris"), tetrix(10,21) {}
 
 bool WXTris::OnInit() {
   // Let base initialize
@@ -32,7 +26,7 @@ bool WXTris::OnInit() {
     MenuItem( "Game", wxID_EXIT, "Quit", &WXTris::OnCmd,this );
     CreateStatusBar(3);
 
-    panel = new MainPanel(_frame);
+    panel = new MainPanel(_frame, tetrix);
     panel->buttons->Button( "Preview", CMD_PREVIEW, &WXTris::OnCmd, this );
     panel->buttons->Button( "Rotate", CMD_ROTATE, &WXTris::OnCmd, this );
 
@@ -53,7 +47,8 @@ int WXTris::FilterEvent( wxEvent &evt ) {
   auto etype =  evt.GetEventType();
   auto akey = wxEVT_KEY_DOWN == etype || wxEVT_KEY_UP == etype;
 
-  if( _running && akey && DoKey( (wxKeyEvent&)evt ) ) {
+  if( tetrix.running && akey && DoKey( (wxKeyEvent&)evt ) ) {
+    _frame->Refresh();
     return true;  // Ret-type is int!?!?!
   }
 
@@ -67,58 +62,35 @@ bool WXTris::DoKey( wxKeyEvent&evt ) {
   bool ret = false;
 
   // If we get a key, take preview-tetro to the board (POC)
-  if( NO_TETRO == show_tetro ) {
-    // Place
+  if( NO_TETRO == tetrix.show_shape ) {
     std::cout << "WXTris::DoKey(): Moving from preview!" << std::endl;
-    show_tetro = last_tetro;
-    show_point = {4,0};
-    show_rot = last_rot;
+    tetrix.Action(NEW_TETRO);
     ret = true;
-  } else if( NO_TETRO != show_tetro ) {
-    // Move
+  } else if( NO_TETRO != tetrix.show_shape ) {
     switch( key ) {
-    case WXK_DOWN:  show_point.y += 1; break;
-    case WXK_LEFT:  show_point.x -= 1; break;
-    case WXK_RIGHT: show_point.x += 1; break;
-    case WXK_UP: show_rot = rot_t( (show_rot+1) % 4 ); break;
-    case WXK_SPACE: 
-      panel->blocks->Pin(); 
-      show_tetro = NO_TETRO;
-      break;
+    case WXK_DOWN: tetrix.Action( MOVE_DOWN ); break;
+    case WXK_LEFT: tetrix.Action( MOVE_LEFT );  break;
+    case WXK_RIGHT: tetrix.Action( MOVE_RIGHT ); break;
+    case WXK_UP: tetrix.Action( ROT_LEFT ); break;
+    case WXK_SPACE: tetrix.Action( FALL ); break;
     }
+    ret = true;
   }
 
-  if( NO_TETRO != show_tetro ) {
-    auto hit = panel->blocks->Tetro( show_point, show_tetro, show_rot );
-    if( HIT_NONE != hit ) {
-      std::cout << "WXTris::DoKey(): Block hit '"<< hit <<"("<< int(hit) << "', removing!" << std::endl;
-      show_tetro = NO_TETRO;
-    }
-    _frame->Refresh();
-  }
-
-  return ret;
+  return true;
 }
-
 
 void WXTris::OnCmd( wxCommandEvent&evt ) {
   // std::cout << "WXTris::OnCmd(): " << evt.GetId() << std::endl;
   switch( evt.GetId() ) {
     case CMD_CLEAR:
-      panel->blocks->cells.clear(NONE);
-      _frame->Refresh();
+      tetrix.Reset(false);
       break;
     case CMD_COLORS:
       ShowColors();
       break;
     case CMD_PREVIEW:
-      last_tetro = tetro_t(rnd_tetro(rnd_gen));
-      last_rot = SOUTH;
-      ShowPreview(last_tetro,last_rot);
-      break;
-    case CMD_ROTATE:
-      last_rot = rot_t( (last_rot+1) % 4 );
-      ShowPreview( last_tetro, last_rot );
+      tetrix.Preview();
       break;
     case wxID_EXIT:
       _frame->Close();
@@ -126,49 +98,44 @@ void WXTris::OnCmd( wxCommandEvent&evt ) {
     default:
       std::cout << "WXTris::OnCmd(): Unknown ID " << evt.GetId() << std::endl;
   }
+  _frame->Refresh();
 }
 
 void WXTris::ShowColors() {
   if( panel && panel->blocks ) {
-    panel->blocks->cells(1,1) = GRAY;
-    panel->blocks->cells(2,1) = WHITE;
+    tetrix(1,1) = GRAY;
+    tetrix(2,1) = WHITE;
 
-    panel->blocks->cells(1,2) = DARK_RED;
-    panel->blocks->cells(2,2) = RED;
-    panel->blocks->cells(3,2) = LIGHT_RED;
+    tetrix(1,2) = DARK_RED;
+    tetrix(2,2) = RED;
+    tetrix(3,2) = LIGHT_RED;
 
-    panel->blocks->cells(1,3) = DARK_YELLOW;
-    panel->blocks->cells(2,3) = YELLOW;
-    panel->blocks->cells(3,3) = LIGHT_YELLOW;
+    tetrix(1,3) = DARK_ORANGE;
+    tetrix(2,3) = ORANGE;
+    tetrix(3,3) = LIGHT_ORANGE;
 
-    panel->blocks->cells(1,4) = DARK_GREEN;
-    panel->blocks->cells(2,4) = GREEN;
-    panel->blocks->cells(3,4) = LIGHT_GREEN;
+    tetrix(1,4) = DARK_YELLOW;
+    tetrix(2,4) = YELLOW;
+    tetrix(3,4) = LIGHT_YELLOW;
 
-    panel->blocks->cells(1,5) = DARK_BLUE;
-    panel->blocks->cells(2,5) = BLUE;
-    panel->blocks->cells(3,5) = LIGHT_BLUE;
+    tetrix(1,5) = DARK_GREEN;
+    tetrix(2,5) = GREEN;
+    tetrix(3,5) = LIGHT_GREEN;
 
-    panel->blocks->cells(1,6) = DARK_CYAN;
-    panel->blocks->cells(2,6) = CYAN;
-    panel->blocks->cells(3,6) = LIGHT_CYAN;
+    tetrix(1,6) = DARK_BLUE;
+    tetrix(2,6) = BLUE;
+    tetrix(3,6) = LIGHT_BLUE;
 
-    panel->blocks->cells(1,7) = DARK_MAGENTA;
-    panel->blocks->cells(2,7) = MAGENTA;
-    panel->blocks->cells(3,7) = LIGHT_MAGENTA;
+    tetrix(1,7) = DARK_CYAN;
+    tetrix(2,7) = CYAN;
+    tetrix(3,7) = LIGHT_CYAN;
+
+    tetrix(1,8) = DARK_MAGENTA;
+    tetrix(2,8) = MAGENTA;
+    tetrix(3,8) = LIGHT_MAGENTA;
     _frame->Refresh();
   } else {
     std::cout << "WXTris::ShowColors(): Widgets not initialized!" << std::endl;
-  }
-}
-
-void WXTris::ShowPreview( tetro_t tet, rot_t rot ) {
-  if( panel && panel->preview ) {
-    // std::cout << "WXTris::ShowPreview("<<tet<<"): rotated " << rotate_t(rot) << std::endl;
-    panel->preview->Tetro( {0,0}, last_tetro, Blocks::rot_t(rot) );
-    _frame->Refresh();
-  } else {
-    std::cout << "WXTris::ShowPreview(): Widgets not initialized!" << std::endl;
   }
 }
 

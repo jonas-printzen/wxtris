@@ -2,6 +2,8 @@
 
 ## IN PROGRESS
 * Refactor BlocksState from Blocks (state/view)
+ - Check and Place works on rotated and moved tetro_t
+ - Move block-handling to class Tetrix
 
 ## BACKLOG
 * Unit-tests for BlocksState

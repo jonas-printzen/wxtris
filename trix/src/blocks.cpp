@@ -15,13 +15,17 @@ struct attr_t {
   wxBrush brush;
 };
 
-std::array<attr_t,20> _attrs {
+std::array<attr_t,23> _attrs {
   attr_t{ wxPen(wxColor(140,140,140),3),  wxBrush(wxColor(115,115,115)) },
   attr_t{ wxPen(wxColor(255,255,255),3),  wxBrush(wxColor(245,245,245)) },
   //RED's
   attr_t{ wxPen(wxColor(130,20,20),3),    wxBrush(wxColor(100,10,10)) },
   attr_t{ wxPen(wxColor(200,50,50),3),    wxBrush(wxColor(180,10,10)) },
   attr_t{ wxPen(wxColor(250,120,120),3),  wxBrush(wxColor(250,75,75)) },
+  //ORANGE's
+  attr_t{ wxPen(wxColor(130,80,20),3),   wxBrush(wxColor(110,80,10)) },
+  attr_t{ wxPen(wxColor(200,110,50),3),   wxBrush(wxColor(190,110,10)) },
+  attr_t{ wxPen(wxColor(250,160,120),3),  wxBrush(wxColor(250,160,75)) },
   //YELLOW's
   attr_t{ wxPen(wxColor(130,130,20),3),   wxBrush(wxColor(100,100,10)) },
   attr_t{ wxPen(wxColor(200,200,50),3),   wxBrush(wxColor(180,180,10)) },
@@ -44,65 +48,8 @@ std::array<attr_t,20> _attrs {
   attr_t{ wxPen(wxColor(250,120,250),3),  wxBrush(wxColor(250,75,250)) },
 };
 
-using tetra_t = std::array<int8_t,4*4>;
-
-static std::array<tetra_t,7> tetras {
-  tetra_t { // I_TETRO
-    0,1,0,0,
-    0,1,0,0,
-    0,1,0,0,
-    0,1,0,0
-  },
-  tetra_t { // J_TETRO
-    0,1,0,0,
-    0,1,0,0,
-    1,1,0,0,
-    0,0,0,0,
-  },
-  tetra_t { // L_TETRO
-    0,1,0,0,
-    0,1,0,0,
-    0,1,1,0,
-    0,0,0,0,
-  },
-  tetra_t { // O_TETRO
-    0,0,0,0,
-    0,1,1,0,
-    0,1,1,0,
-    0,0,0,0
-  },
-  tetra_t { // S_TETRO
-    0,0,0,0,
-    0,1,1,0,
-    1,1,0,0,
-    0,0,0,0,
-  },
-  tetra_t { // Z_TETRO
-    0,0,0,0,
-    1,1,0,0,
-    0,1,1,0,
-    0,0,0,0,
-  },
-  tetra_t { // T_TETRO
-    0,0,0,0,
-    1,1,1,0,
-    0,1,0,0,
-    0,0,0,0,
-  },
-};
-
-static std::array<color_t,7> tcolors {
-  CYAN,
-  BLUE,
-  DARK_YELLOW,
-  YELLOW,
-  GREEN,
-  RED,
-  MAGENTA,
-};
-
-Blocks::Blocks( wxWindow *parent, wxSize bsz, int side ) 
-  : wxPanel(parent), cells(bsz.x,bsz.y), pinned(bsz.x,bsz.y), _bsz(bsz), _side(side) {
+Blocks::Blocks( wxWindow *parent, const tgrid_t &grid, int side ) 
+  : wxPanel(parent), grid(grid), _side(side) {
 
   SetBackgroundStyle(wxBG_STYLE_PAINT);
   SetBackgroundColour(wxColor(20,20,32));
@@ -119,77 +66,6 @@ Blocks::Blocks( wxWindow *parent, wxSize bsz, int side )
     psz->Add(this,5, wxEXPAND |wxALL, MARGIN);
   }
 }
-
-Blocks::points_t Blocks::Points( wxPoint p, tetro_t tet , rot_t rot ) {
-  int tid = std::min((size_t)tet, tetras.size()-1);
-  auto &shape = tetras[tid];
-
-  points_t points;
-
-  // We group to handle symmetry 
-  switch( tet ) {
-    case I_TETRO:
-      rot = (rot & 1)?EAST:SOUTH; // Cheat for better rotation
-    case O_TETRO:
-      for( auto [x,y] : Range2( {0,0}, {4,4} ) ) {
-        auto [rx,ry] = Rotate<4>( {x,y}, rot );
-        if( shape[4*ry+rx] ) {
-          points.push_back( {uint8_t(p.x+x), uint8_t(p.y+y)} );
-        }
-      }
-      break;
-    //-------------------------------------------------------
-    case S_TETRO:
-    case Z_TETRO:
-      rot = (rot & 1)?WEST:SOUTH; // Cheat for better rotation
-    case J_TETRO:
-    case L_TETRO:
-    case T_TETRO:
-      for( auto [x,y] : Range2( {0,0}, {3,3} ) ) {
-        auto [rx,ry] = Rotate<3>( {x,y}, rot );
-        if( shape[4*ry+rx] ) points.emplace_back( p.x+x, p.y+y );;
-      }
-      break;
-    default:;
-  }
-  
-  return points;
-}
-
-hit_t Blocks::Check( const points_t &points ) {
-  for( auto [x,y] : points ) {
-    if( x <  0 ) return HIT_LEFT;
-    if( x >= _bsz.GetWidth() ) return HIT_RIGHT;
-    if( y >= _bsz.GetHeight() ) return HIT_BOTTOM;
-    if( cells(x,y) ) return HIT_BLOCK;
-  }
-
-  return HIT_NONE;
-}
-
-hit_t Blocks::Tetro( wxPoint p, tetro_t tet , rot_t rot ) {
-  // Reset to pinned ...
-  cells = pinned;
-  auto points = Points( p, tet, rot );
-  // Will this tetro hit anything?
-  hit_t hit = Check( points );
-
-  if( HIT_NONE == hit ) {
-    // What color for this tetra
-    color_t color = tcolors[std::min((size_t)tet, tetras.size()-1)];
-    // Fill the grid
-    for( auto [x,y] : Points(p,tet,rot) ) {
-      cells(x,y) = color;
-    }
-  }
-
-  return hit;
-}
-
-void Blocks::Pin() {
-  pinned = cells;
-}
-
 
 void Blocks::OnPaint( wxPaintEvent &evt ) {
   wxAutoBufferedPaintDC dc(this);
@@ -211,9 +87,9 @@ void Blocks::OnPaint( wxPaintEvent &evt ) {
   wxPoint mousePos = ScreenToClient( wxGetMousePosition() );
   wxRect mouseRec;
 
-  for( auto [x,y] : Range2<int>( _bsz.x, _bsz.y ) ) {
+  for( auto [x,y] : Range2<int>( grid.cols(), grid.rows() ) ) {
     rec.SetPosition( wxPoint(1+MARGIN/2+x*_side, 1+MARGIN/2+y*_side) );
-    size_t aid = cells(x,y);
+    size_t aid = grid(x,y);
     if( aid ) {
       aid = std::min(aid,_attrs.size()) - 1;
       attr_t &attr = _attrs[aid];
@@ -240,9 +116,8 @@ void Blocks::OnMouse( wxMouseEvent &evt ) {
   evt.Skip();
 }
 
-
 wxRect Blocks::GetBlocksRect() {
-  wxRect rec( 0,0,_bsz.GetWidth()*_side, _bsz.GetHeight()*_side );
+  wxRect rec( 0,0,grid.cols()*_side, grid.rows()*_side );
   rec.width += MARGIN+1;
   rec.height += MARGIN+1;
   return rec;

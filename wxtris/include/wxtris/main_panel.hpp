@@ -19,7 +19,7 @@ public:
   static constexpr const int MARGIN = 16;
 
   /** @brief Designed to be main-panel in frame */
-  MainPanel( wxFrame *frame );
+  MainPanel( wxFrame *frame, const Tetrix &tetrix );
 
   Blocks *blocks=nullptr;     ///< The main block for the game
   Blocks *preview=nullptr;    ///< Preview of next item

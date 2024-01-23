@@ -2,8 +2,64 @@
 
 namespace trix {
 
-std::ostream& operator << ( std::ostream&out, tetro_t tet ) {
-  switch( tet ) {
+const tetros_t tetros {
+  tetro_t{      // I_TETRO
+    point_t{1,0},
+    point_t{1,1},
+    point_t{1,2},
+    point_t{1,3},
+  },
+  tetro_t{      // J_TETRO
+    point_t{1,0},
+    point_t{1,1},
+    point_t{1,2},
+    point_t{0,2},
+  },
+  tetro_t{      // L_TETRO
+    point_t{1,0},
+    point_t{1,1},
+    point_t{1,2},
+    point_t{2,2},
+  },
+  tetro_t{      // O_TETRO
+    point_t{1,1},
+    point_t{2,1},
+    point_t{1,2},
+    point_t{2,2},
+  },
+  tetro_t{      // S_TETRO
+    point_t{1,1},
+    point_t{2,1},
+    point_t{0,2},
+    point_t{1,2},
+  },
+  tetro_t{      // Z_TETRO
+    point_t{0,1},
+    point_t{1,1},
+    point_t{1,2},
+    point_t{2,2},
+  },
+  tetro_t{      // T_TETRO
+    point_t{0,1},
+    point_t{1,1},
+    point_t{2,1},
+    point_t{1,2},
+  },
+};
+
+std::array<color_t,7> colors {
+  CYAN,
+  BLUE,
+  ORANGE,
+  YELLOW,
+  GREEN,
+  RED,
+  MAGENTA,
+};
+
+
+std::ostream& operator << ( std::ostream&out, shape_t shape ) {
+  switch( shape ) {
     case I_TETRO: out << "I_TETRO"; break;
     case J_TETRO: out << "J_TETRO"; break;
     case L_TETRO: out << "L_TETRO"; break;
@@ -16,7 +72,7 @@ std::ostream& operator << ( std::ostream&out, tetro_t tet ) {
   return out;
 }
 
-std::ostream& operator << ( std::ostream&out, rotate_t rot ) {
+std::ostream& operator << ( std::ostream&out, rot_t rot ) {
   switch( rot ) {
   case SOUTH:  out << "SOUTH"; break;
   case WEST:   out << "WEST"; break;
@@ -26,6 +82,34 @@ std::ostream& operator << ( std::ostream&out, rotate_t rot ) {
   return out;
 }
 
+point_t& point_t::rot( rot_t to, rot_t from, int16_t dim ) {
+  rot_t rot = rot_t((4+to-from) % 4);
+
+  auto old_x = x;
+
+  switch( rot ) {
+    case NORTH:
+      x = (dim-1)-x; 
+      y = (dim-1)-y;
+      break;
+    case EAST:
+      x = (dim-1)-y;
+      y = old_x;
+      break;
+    case WEST: 
+      x = y;
+      y = (dim-1)-old_x ;
+      break;
+    default:;
+  }
+
+  return *this;
+}
+
+void point_t::place( int16_t dx, int16_t dy ) {
+  x += dx;
+  y += dy;
+}
 
 std::ostream& operator << ( std::ostream&out, hit_t hit ) {
   switch( hit ) {
