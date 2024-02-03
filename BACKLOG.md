@@ -1,12 +1,10 @@
 # BACKLOG for WXTris
 
 ## IN PROGRESS
-* Refactor BlocksState from Blocks (state/view)
- - Check and Place works on rotated and moved tetro_t
- - Move block-handling to class Tetrix
+* User actions
 
 ## BACKLOG
-* Unit-tests for BlocksState
+* Unit-tests for Tetrix
 * Pin and fall
 * Remove complete lines, and fall
 * Implement proper randomization
@@ -14,6 +12,7 @@
 * Center preview better
 
 ## DONE
+* Refactor Tetrix from Blocks (state/view)
 * Detect boundaries and blocks
 * Keyboard navigation
 * Improve rotations

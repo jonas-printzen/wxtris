@@ -4,6 +4,8 @@
 #include <trix/types.hpp>
 #include <wx/wx.h>
 
+#include <map>
+
 namespace trix {
 
 /** @brief The GUI agent

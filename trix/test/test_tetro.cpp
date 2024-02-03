@@ -9,6 +9,7 @@ TEST(Tetro,Point) {
   point_t p{1,1};
 
   p.rot( WEST ); // dim=3
+  // At center, no change
   EXPECT_EQ( 1, p.x );  EXPECT_EQ( 1, p.y );
 
   p.rot( NORTH, 4 );

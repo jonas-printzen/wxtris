@@ -29,7 +29,8 @@ enum rot_t {
   SOUTH,
   WEST,
   NORTH,
-  EAST
+  EAST,
+  NO_ROT,
 };
 
 std::ostream& operator << ( std::ostream&out, rot_t rot );
@@ -122,10 +123,6 @@ public:
     return _cells.at(col+_cols*row);
   }
 
-  // inline color_t& operator [] ( const coords_t&col_row ) {
-  //   return _cells.at(std::get<0>(col_row)+_cols*std::get<1>(col_row));
-  // }
-
   inline range_t range() {
     return range_t{ {0,0}, {_cols,_rows} };
   }
@@ -133,6 +130,12 @@ public:
   inline void clear( color_t val ) {
     for( auto &cell : _cells ) {
       cell = val;
+    }
+  }
+
+  inline void place( const tetro_t tetro, color_t c ) {
+    for( auto [x,y] : tetro ) {
+      (*this)(x,y) = c;
     }
   }
 

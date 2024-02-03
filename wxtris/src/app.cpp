@@ -47,8 +47,7 @@ int WXTris::FilterEvent( wxEvent &evt ) {
   auto etype =  evt.GetEventType();
   auto akey = wxEVT_KEY_DOWN == etype || wxEVT_KEY_UP == etype;
 
-  if( tetrix.running && akey && DoKey( (wxKeyEvent&)evt ) ) {
-    _frame->Refresh();
+  if( tetrix.Running() && akey && DoKey( (wxKeyEvent&)evt ) ) {
     return true;  // Ret-type is int!?!?!
   }
 
@@ -58,31 +57,34 @@ int WXTris::FilterEvent( wxEvent &evt ) {
 bool WXTris::DoKey( wxKeyEvent&evt ) {
   if( wxEVT_KEY_DOWN != evt.GetEventType() ) return false;
 
-  auto key = evt.GetKeyCode();
-  bool ret = false;
 
-  // If we get a key, take preview-tetro to the board (POC)
-  if( NO_TETRO == tetrix.show_shape ) {
-    std::cout << "WXTris::DoKey(): Moving from preview!" << std::endl;
-    tetrix.Action(NEW_TETRO);
-    ret = true;
-  } else if( NO_TETRO != tetrix.show_shape ) {
-    switch( key ) {
-    case WXK_DOWN: tetrix.Action( MOVE_DOWN ); break;
-    case WXK_LEFT: tetrix.Action( MOVE_LEFT );  break;
-    case WXK_RIGHT: tetrix.Action( MOVE_RIGHT ); break;
-    case WXK_UP: tetrix.Action( ROT_LEFT ); break;
-    case WXK_SPACE: tetrix.Action( FALL ); break;
-    }
-    ret = true;
+  auto key = evt.GetKeyCode();
+  bool ret = true;
+  hit_t hit = HIT_NONE;
+
+
+  switch( key ) {
+  case WXK_DOWN:  hit = tetrix.Move( MOVE_DOWN ); break;
+  case WXK_LEFT:  hit = tetrix.Move( MOVE_LEFT );  break;
+  case WXK_RIGHT: hit = tetrix.Move( MOVE_RIGHT ); break;
+  case WXK_UP:    hit = tetrix.Move( ROT_LEFT ); break;
+  case WXK_SPACE: hit = tetrix.Fall(); break;
+  default: tetrix.Increment();
   }
 
-  return true;
+  _frame->Refresh();
+
+  std::cout << "WXTris::DoKey(): " << hit << std::endl;
+
+  return ret;
 }
 
 void WXTris::OnCmd( wxCommandEvent&evt ) {
   // std::cout << "WXTris::OnCmd(): " << evt.GetId() << std::endl;
   switch( evt.GetId() ) {
+    case CMD_START:
+      tetrix.Start();
+      break;
     case CMD_CLEAR:
       tetrix.Reset(false);
       break;

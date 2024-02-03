@@ -5,27 +5,20 @@
 
 namespace trix {
 
-/** @brief User movement 
- *
- * User requested action
- */
-enum act_t {
-  STILL=0,
-  NEW_TETRO,
-  MOVE_DOWN,
+enum move_t {
+  MOVE_UP,  
+  MOVE_DOWN,  
   MOVE_LEFT,
   MOVE_RIGHT,
+  FALL_DOWN,
   ROT_RIGHT,
   ROT_LEFT,
-  FALL,
 };
-
-extern std::ostream& operator << (std::ostream&out, act_t act );
 
 /** @brief The Tetrix game 
  *
  * This class represents state and logic of the Tetrix game.
- * All you need is to implement a vew to the state and call
+ * All you need is to implement a view to the state and call
  * the methods provided to update the game-state.
  *
  */
@@ -36,18 +29,28 @@ public:
 
   Tetrix( size_type cols, size_type rows );
 
+  inline bool Running() const { return _running; }
+
+  void Start();
+  void Pause();
+  void Stop();
+
   /** @brief Get the points of the tetro 
    *
    * This will provide the points included in the current tetro.
    *
    * @param p   The point at which to check
-   * @param tet The tetro-variant
-   * @param rot The rotation
+   * @param tet The tetro-shape, default => show_shape 
+   * @param rot The rotation, default => show_rot
    *
    * @return The points of the placed and rotated tetro
    */
-  tetro_t Tetro( point_t pos, shape_t shape , rot_t rot );
+  tetro_t Tetro( point_t pos, rot_t rot=NO_ROT, shape_t shape=NO_TETRO );
 
+  /** @brief Randomize int 
+   *
+   * This is used to get a random int
+   */
   int Randomize( int from, int to );
 
   /** @brief Check for collision 
@@ -62,45 +65,31 @@ public:
   /** @brief Populate preview with shape */
   void Preview( shape_t shape=NO_TETRO );
 
-  /** @brief Populate with given tetro _t
+  /** @brief Move the active tetro 
    *
-   * Given the point, variant and rotation, attempt to place a tetro 
-   * in the grid. If the tetro will not fit or collides with previous
-   * content, fail and return false.
+   * Move an active tetro in the direction given, report
+   * a hit if move does not work. When apply is 'true' the
+   * state is updated and a HIT_BOTTOM will pin the tetro.
    *
-   * @note The color of the tetro is implicit
-   *
-   * @param p   The point at which to put the tetro
-   * @param shape The tetro-variant
-   * @param rot The rotation
-   * @return Returns 'true' if the tetro was placed without problem.
+   * @param mv      Direction to move
+   * @param apply   If true, the state is updated
+   * @return HIT_NONE if move ok OR if nothing to move
    */
-  inline hit_t Place( point_t p, shape_t shape , rot_t rot ) {
-    // Reset to pinned ...
-    Reset();
-    auto tetro = Tetro( p, shape, rot );
-    // Will this tetro hit anything?
-    hit_t hit = Check( tetro );
+  hit_t Move( move_t mv, bool apply=true );
 
-    if( HIT_NONE == hit ) Place( tetro, colors[shape] );
-    return hit;
-  }
-
-  /** @brief Populate grid with tetro 
+  /** @brief Let the tetro fall 
    *
-   * Plance a prepared tetro on grid
-   *
-   * @param tetro   The prepared tetro points
-   * @param color   Color to use placing the tetor
+   * Let the tetro fall until it hit something
    */
-  void Place( const tetro_t&tetro, color_t color );
+  hit_t Fall();
 
-  /** @brief Pin the cells 
+  /** @brief Run an increment of state 
    *
-   * The current state of the cells-matrix is pinned and will be used
-   * as base the next time Place() is called.
+   * If there is an active tetro, attempt move down.
+   * The grid is scanned for full vertical lines and updated.
+   * If needed a new tetro is initialized at the top.
    */
-  void Pin();
+  void Increment();
 
   /** @brief Restore cells
    *
@@ -121,22 +110,17 @@ public:
     return cells(col,row);
   }
 
-  /** @brief User action 
-   *
-   * This handles user-actions and return if it hit something.
-   */
-  void Action( act_t act );
-
   tgrid_t preview; ///< Next tetro
   tgrid_t cells;   ///< The cells shown
-  tgrid_t pinned;  ///< The cells pinned
 
+protected:
+  tgrid_t pinned;  ///< The cells pinned
   point_t show_point={0,0};
   shape_t show_shape=NO_TETRO;
   rot_t   show_rot=SOUTH;
 
   shape_t pre_shape=NO_TETRO;
-  bool    running=true;
+  bool    _running=true;
 };
 
 

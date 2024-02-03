@@ -7,27 +7,28 @@ static std::mt19937 rnd_gen;
 
 namespace trix {
 
-std::ostream& operator << (std::ostream&out, act_t act ) {
-  switch( act ) {
-  case STILL: out << "STILL"; break;
-  case NEW_TETRO: out << "NEW_TETRO"; break;
-  case MOVE_DOWN: out << "MOVE_DOWN"; break;
-  case MOVE_LEFT: out << "MOVE_LEFT"; break;
-  case MOVE_RIGHT: out << "MOVE_RIGHT"; break;
-  case ROT_RIGHT: out << "ROT_RIGHT"; break;
-  case ROT_LEFT: out << "ROT_LEFT"; break;
-  case FALL: out << "FALL"; break;
-  }
-  return out;
-}
-
-
 Tetrix::Tetrix( size_type cols, size_type rows )
   : cells(cols,rows), pinned(cols,rows), preview(4, 4) {
+    std::random_device rd;
+    rnd_gen.seed(rd());
 }
 
+void Tetrix::Start() {
+  _running = true;
+  Preview();
+}
 
-tetro_t Tetrix::Tetro( point_t pos, shape_t shape , rot_t rot ) {
+void Tetrix::Pause() {
+  _running = false;
+}
+
+void Tetrix::Stop() {
+  _running = false;
+}
+
+tetro_t Tetrix::Tetro( point_t pos, rot_t rot, shape_t shape ) {
+  if( NO_TETRO == shape ) shape = show_shape;
+  if( NO_ROT == rot ) rot = show_rot;
 
   tetro_t tetro = tetros[shape];
   int16_t dim=3;
@@ -69,51 +70,12 @@ hit_t Tetrix::Check( const tetro_t &tetro ) {
   return HIT_NONE;
 }
 
-void Tetrix::Preview( shape_t shape ) {
-  if( NO_TETRO == shape ) {
-    pre_shape = (shape_t)Randomize(0,6);
-  } else {
-    pre_shape = shape;
-  }
-
-  auto tetro = Tetro( {0,0}, pre_shape, SOUTH );
-
-  preview.clear(NOCOLOR);
-
-  for( auto [x,y] : tetro ) {
-    preview(x,y) = colors[pre_shape];
-  }
-}
-
-void Tetrix::Place( const tetro_t&tetro, color_t color ) {
-  Reset();
-  for( auto [x,y] : tetro ) {
-    cells(x,y) = color;
-  }
-}
-
-void Tetrix::Pin() {
-  pinned = cells;
-}
-
-void Tetrix::Reset( bool to_pinned ) {
-  if( !to_pinned ) {
-    pinned.clear( NOCOLOR );
-  }
-  cells = pinned;
-}
-
-void Tetrix::Action( act_t act ) {
-  std::cout << "Tetrix::Action(): " << act << std::endl;
-  if( !running ) return;
-
-  point_t next_point = show_point;
-  rot_t  next_rot    = show_rot;
-  tetro_t new_tetro;
-
+hit_t Tetrix::Move( move_t mv, bool apply ) {
+  hit_t hit = HIT_NONE;
   if( NO_TETRO != show_shape ) {
-    std::cout << "Tetrix::Action(): In-action " << act << std::endl;
-    switch( act ) {
+    point_t next_point = show_point;
+    rot_t next_rot = show_rot;
+    switch( mv ) {
     case MOVE_DOWN:
       next_point.y += 1;
       break;
@@ -129,54 +91,76 @@ void Tetrix::Action( act_t act ) {
     case ROT_LEFT:
       next_rot = rot_t( (next_rot+3) % 4 );
       break;
-    case FALL:
-      // TODO: Implement actual fall
-      Pin();
-      show_shape = NO_TETRO;
-      break;
     default:;
     }
-
-    if( NO_TETRO != show_shape ) {
-      std::cout << "Tetrix::Action(): Show-action " << act << std::endl;
-      new_tetro = Tetro(next_point,show_shape,next_rot);
-      hit_t hit = Check(new_tetro);
+    // Need a tetro to check
+    tetro_t tetro = Tetro(next_point, next_rot);
+    hit = Check( tetro );
+    if( apply ) {
       if( HIT_NONE == hit ) {
-        // Just update
         show_point = next_point;
-        show_rot   = next_rot;
-        Place( new_tetro, colors[show_shape] );
-      } else {
-        // Either just block action, or forward game
-        switch( act ) {
-        case MOVE_LEFT:
-        case MOVE_RIGHT:
-        case ROT_LEFT:
-        case ROT_RIGHT:
-          std::cout << "Tetrix::Action(): Blocked movement!" << std::endl;
-          break;
-        case MOVE_DOWN:
-          // At bottom
-          std::cout << "Tetrix::Action(): Bottom-action!" << std::endl;
-          Pin();
-          show_shape = NO_TETRO;
-          break;
-        default:
-          std::cout << "Tetrix::Action(): Unknown re-action!" << std::endl;
-        }
+        show_rot = next_rot;
+        Reset(true);
+        cells.place(tetro, colors[show_shape] );
+      } else if( MOVE_DOWN == mv ) {
+        pinned = cells;
+        show_shape = NO_TETRO;
+        hit = HIT_BOTTOM;     // HIT_BLOCK => HIT_BOTTOM
       }
     }
-  } else if( NEW_TETRO == act ) {
-    std::cout << "Tetrix::Action(): New-action " << act << std::endl;
-    show_point = {3,0};
-    show_shape = pre_shape;
-    show_rot = SOUTH;
-    new_tetro = Tetro(show_point,show_shape,show_rot);
-    Place( new_tetro, colors[show_shape] );
-    Preview();
+  }
+  return hit;
+}
+
+hit_t Tetrix::Fall() {
+  hit_t hit=HIT_NONE;
+  if( NO_TETRO != show_shape ) {
+    for( int i : Range<int>(0,cells.rows()) ) {
+      hit = Move( MOVE_DOWN );
+      if( HIT_NONE != hit ) break;
+    }
   }
 
+  return hit;
 }
+
+
+void Tetrix::Preview( shape_t shape ) {
+  std::cout << "Tetrix::Preview(): " << shape << std::endl;
+  if( NO_TETRO == shape ) {
+    pre_shape = (shape_t)Randomize(0,6);
+  } else {
+    pre_shape = shape;
+  }
+
+  auto tetro = Tetro( {0,0}, SOUTH, pre_shape );
+
+  preview.clear(NOCOLOR);
+  preview.place( tetro, colors[pre_shape] );
+}
+
+void Tetrix::Reset( bool to_pinned ) {
+  if( !to_pinned ) {
+    pinned.clear( NOCOLOR );
+  }
+  cells = pinned;
+}
+
+void Tetrix::Increment() {
+  if( NO_TETRO != show_shape ) {
+    // We have an active tetro
+    auto hit = Move( MOVE_DOWN );
+    std::cout << "Tetrix::Increment(): Move(DOWN)" << std::endl;
+  } else if( NO_TETRO!=pre_shape ) {
+    std::cout << "Tetrix::Increment(): NEW Tetro" << std::endl;
+    show_shape = pre_shape;
+    show_point = {2,0};
+    show_rot = SOUTH;
+    Move(MOVE_UP);
+    Preview();
+  }
+}
+
 
 
 } // namespace trix

@@ -1,17 +1,17 @@
 #ifndef TRIX_TYPES_HDR
 #define TRIX_TYPES_HDR
 
-#include <stdint.h>
 #include <wx/wx.h>
 
 #include <string>
 #include <string_view>
-#include <map>
+#include <span>
 
 namespace trix {
 
 using std::string;
 using chars_t = std::string_view;
+using ints_t = std::span<int>;
 
 inline std::ostream& operator << ( std::ostream&out, const wxPoint &p ) {
   out << p.x << "," << p.y;
