@@ -15,6 +15,7 @@ Tetrix::Tetrix( size_type cols, size_type rows )
 
 void Tetrix::Start() {
   _running = true;
+  show_point = {0,0};
   Preview();
 }
 
@@ -24,6 +25,7 @@ void Tetrix::Pause() {
 
 void Tetrix::Stop() {
   _running = false;
+  show_shape = NO_TETRO;
 }
 
 tetro_t Tetrix::Tetro( point_t pos, rot_t rot, shape_t shape ) {
@@ -147,7 +149,9 @@ void Tetrix::Reset( bool to_pinned ) {
 }
 
 void Tetrix::Increment() {
-  if( NO_TETRO != show_shape ) {
+  if( !_running ) {
+    std::cout << "Tetrix::Increment(): Not running!" << std::endl;
+  } else if( NO_TETRO != show_shape ) {
     // We have an active tetro
     auto hit = Move( MOVE_DOWN );
     std::cout << "Tetrix::Increment(): Move(DOWN)" << std::endl;

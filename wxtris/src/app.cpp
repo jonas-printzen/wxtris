@@ -6,13 +6,16 @@ using namespace trix;
 
 enum menu_ids {
   CMD_START=wxID_HIGHEST+10,
+  CMD_PAUSE,
+  CMD_STOP,
   CMD_COLORS,
   CMD_CLEAR,
   CMD_PREVIEW,
-  CMD_ROTATE
+  CMD_ROTATE, // Rotate the preview
+  CMD_STEP    // When running, timer sends this command
 };
 
-WXTris::WXTris() : GUI("WXTris"), tetrix(10,21) {}
+WXTris::WXTris() : GUI("WXTris"), tetrix(10,21), timer(this,CMD_STEP) {}
 
 bool WXTris::OnInit() {
   // Let base initialize
@@ -20,6 +23,8 @@ bool WXTris::OnInit() {
     std::cout << "WXTris::OnInit() ..." << std::endl;
 
     MenuItem( "Game", CMD_START,  "Start", &WXTris::OnCmd,this );
+    MenuItem( "Game", CMD_PAUSE,  "Pause", &WXTris::OnCmd,this );
+    MenuItem( "Game", CMD_STOP,  "Stop", &WXTris::OnCmd,this );
     MenuItem( "Game", CMD_CLEAR,  "Clear", &WXTris::OnCmd,this );
     MenuItem( "Game", CMD_COLORS,  "Colors", &WXTris::OnCmd,this );
     MenuItem( "Game", CMD_PREVIEW,  "Preview", &WXTris::OnCmd,this );
@@ -27,8 +32,9 @@ bool WXTris::OnInit() {
     CreateStatusBar(3);
 
     panel = new MainPanel(_frame, tetrix);
-    panel->buttons->Button( "Preview", CMD_PREVIEW, &WXTris::OnCmd, this );
-    panel->buttons->Button( "Rotate", CMD_ROTATE, &WXTris::OnCmd, this );
+    panel->buttons->Button( "Start", CMD_START, &WXTris::OnCmd, this );
+    panel->buttons->Button( "Pause", CMD_PAUSE, &WXTris::OnCmd, this );
+    panel->buttons->Button( "Pause", CMD_STOP, &WXTris::OnCmd, this );
 
     // To let panel decide main window size
     wxSizer *psz = new wxBoxSizer(wxHORIZONTAL);
@@ -36,6 +42,9 @@ bool WXTris::OnInit() {
     SetSizerAndFit( psz );
 
     Show(true);
+
+    Bind( wxEVT_TIMER, &WXTris::OnStep, this );
+
     std::cout << "WXTris::OnInit() done!" << std::endl;
     return true;
   }
@@ -45,9 +54,9 @@ bool WXTris::OnInit() {
 
 int WXTris::FilterEvent( wxEvent &evt ) {
   auto etype =  evt.GetEventType();
-  auto akey = wxEVT_KEY_DOWN == etype || wxEVT_KEY_UP == etype;
+  auto isakey = wxEVT_KEY_DOWN == etype || wxEVT_KEY_UP == etype;
 
-  if( tetrix.Running() && akey && DoKey( (wxKeyEvent&)evt ) ) {
+  if( isakey && DoKey( (wxKeyEvent&)evt ) ) {
     return true;  // Ret-type is int!?!?!
   }
 
@@ -57,11 +66,9 @@ int WXTris::FilterEvent( wxEvent &evt ) {
 bool WXTris::DoKey( wxKeyEvent&evt ) {
   if( wxEVT_KEY_DOWN != evt.GetEventType() ) return false;
 
-
   auto key = evt.GetKeyCode();
   bool ret = true;
   hit_t hit = HIT_NONE;
-
 
   switch( key ) {
   case WXK_DOWN:  hit = tetrix.Move( MOVE_DOWN ); break;
@@ -79,11 +86,22 @@ bool WXTris::DoKey( wxKeyEvent&evt ) {
   return ret;
 }
 
+void WXTris::OnStep( wxTimerEvent &evt ) {
+  tetrix.Increment();
+  _frame->Refresh();
+}
+
+
 void WXTris::OnCmd( wxCommandEvent&evt ) {
   // std::cout << "WXTris::OnCmd(): " << evt.GetId() << std::endl;
   switch( evt.GetId() ) {
     case CMD_START:
       tetrix.Start();
+      timer.Start(1000);
+      break;
+    case CMD_STOP:
+      tetrix.Stop();
+      timer.Stop();
       break;
     case CMD_CLEAR:
       tetrix.Reset(false);

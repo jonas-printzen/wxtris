@@ -120,7 +120,7 @@ protected:
   rot_t   show_rot=SOUTH;
 
   shape_t pre_shape=NO_TETRO;
-  bool    _running=true;
+  bool    _running=false;
 };
 
 

@@ -25,6 +25,8 @@ public:
 
   bool DoKey( wxKeyEvent&evt );
 
+  void OnStep( wxTimerEvent &evt );
+
 protected:
 
   /** @brief Setup main blocks to show colors */
@@ -34,7 +36,9 @@ private:
 
   Tetrix  tetrix;
 
-  MainPanel *panel;
+  wxTimer timer;
+
+  MainPanel *panel = nullptr;
 };
 
 } // namespace wxtris
