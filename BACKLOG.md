@@ -1,17 +1,17 @@
 # BACKLOG for WXTris
 
 ## IN PROGRESS
-* User actions
+* Remove complete lines, and fall
 
 ## BACKLOG
 * Unit-tests for Tetrix
-* Pin and fall
-* Remove complete lines, and fall
 * Implement proper randomization
-* Scores
+* Scores / End Of Game
 * Center preview better
 
 ## DONE
+* User actions
+* Pin and fall
 * Refactor Tetrix from Blocks (state/view)
 * Detect boundaries and blocks
 * Keyboard navigation

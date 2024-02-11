@@ -32,7 +32,7 @@ public:
   inline bool Running() const { return _running; }
 
   void Start();
-  void Pause();
+  void Pause( bool pause=true );
   void Stop();
 
   /** @brief Get the points of the tetro 
@@ -90,6 +90,9 @@ public:
    * If needed a new tetro is initialized at the top.
    */
   void Increment();
+
+  /** @brief Pin the cells and check for full lines */
+  bool Pin();
 
   /** @brief Restore cells
    *

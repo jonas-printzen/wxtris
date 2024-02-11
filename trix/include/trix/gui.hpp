@@ -54,7 +54,15 @@ protected:
     _frame->SetSizerAndFit( _sizer );
   }
 
-  /** @brief Create/find a menu on the menu-bar. */
+  /** @brief Create/find a menu on the menu-bar
+   *
+   * Get a menu named as provided. If non exist with that name, it's created.
+   *
+   * @note First time called, a menu-bar is created to hold the menu's.
+   *
+   * @param title The menu title to use
+   * @return Reference to the menu
+   */
   wxMenu& Menu( chars_t title );
 
   /** @brief Create an item on given menu */

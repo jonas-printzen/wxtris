@@ -6,8 +6,6 @@
 #include <trix/tetrix.hpp>
 #include <wxtris/main_panel.hpp>
 
-#include <map>
-
 namespace wxtris {
 using namespace trix;
 
@@ -18,19 +16,20 @@ public:
   WXTris();
 
   bool OnInit() override;
-
   void OnCmd( wxCommandEvent&evt );
-
   int FilterEvent( wxEvent &evt ) override;
-
   bool DoKey( wxKeyEvent&evt );
-
   void OnStep( wxTimerEvent &evt );
 
 protected:
 
-  /** @brief Setup main blocks to show colors */
-  void ShowColors();
+  /** @brief Execute user-command 
+   *
+   * To allow execution from both wxCommandEvent and other...
+   *
+   * @see `cmd_ids` in app.cpp
+   */
+  void DoCmd( int cmd );
 
 private:
 
