@@ -110,38 +110,48 @@ public:
   // using coords_t = std::tuple<uint16_t,uint16_t>;
   using range_t = Range2<coord_t>;
 
-  tgrid_t( size_type c, size_type r ) : _cells(c*r), _cols(c), _rows(r) {}
+  tgrid_t( size_type columns, size_type rows );
 
+  /** @brief Returns number of columns */
   inline constexpr coord_t cols() const { return _cols; }
+
+  /** @brief Returns number of rows */
   inline constexpr coord_t rows() const { return _rows; }
 
+  /** @brief Access a cell */
   inline color_t& operator() ( coord_t col, coord_t row ) {
     return _cells.at(col+_cols*row);
   }
 
+  /** @brief Access a cell, const */
   inline const color_t& operator() ( coord_t col, coord_t row ) const {
     return _cells.at(col+_cols*row);
   }
 
+  /** @brief Helper for 2D iterator */
   inline range_t range() {
     return range_t{ {0,0}, {_cols,_rows} };
   }
 
-  inline void clear( color_t val ) {
-    for( auto &cell : _cells ) {
-      cell = val;
-    }
-  }
+  /** @brief Clear the grid, optional to color */
+  void clear( color_t val=NOCOLOR );
 
-  inline void place( const tetro_t tetro, color_t c ) {
-    for( auto [x,y] : tetro ) {
-      (*this)(x,y) = c;
-    }
-  }
+  /** @brief Place a tetro on the grid, no checks! */
+  void place( const tetro_t tetro, color_t c );
 
-  inline void operator = ( const tgrid_t &other ) {
-    _cells = other._cells;
-  }
+  /** @brief Count the number of gaps in a row */
+  int gaps( coord_t row ) const;
+
+  /** @brief Mark entire row with given color */
+  void mark( coord_t row, color_t mark_color );
+
+  /** @brief Remove row */
+  void erase( coord_t row, color_t filler=NOCOLOR );
+
+  /** @brief Remove all marked rows */
+  void prune( color_t mark_color );
+
+  void operator = ( const tgrid_t &other );
 
 #ifndef TRIX_TEST
 private:

@@ -104,13 +104,11 @@ hit_t Tetrix::Move( move_t mv, bool apply ) {
         Reset(true);
         cells.place(tetro, colors[show_shape] );
       } else if( MOVE_DOWN == mv ) {
-        Pin();
-        show_shape = NO_TETRO;
         hit = HIT_BOTTOM;     // HIT_BLOCK => HIT_BOTTOM
       }
     }
   }
-  return hit;
+  return _hit = hit;
 }
 
 hit_t Tetrix::Fall() {
@@ -146,39 +144,57 @@ void Tetrix::Reset( bool to_pinned ) {
   cells = pinned;
 }
 
-void Tetrix::Increment() {
-  if( !_running ) return;
-
-  if( NO_TETRO != show_shape ) {
-    // We have an active tetro
-    Move( MOVE_DOWN );
-  } else if( NO_TETRO != pre_shape ) {
-    show_shape = pre_shape;
-    show_point = {2,0};
-    show_rot = SOUTH;
-    Move(MOVE_DOWN);
-    Preview();
-  }
-}
-
 bool Tetrix::Pin() {
   bool ret = false;
   // Mark full lines
   for( auto row : Range(cells.rows()) ) {
-    int gaps=0;
-    for( auto col : Range(cells.cols()) ) {
-      if( !cells(col,row) ) ++gaps;
-    }
+    int gaps=cells.gaps(row);
     // Mark row white of no gaps!
     if( 0 == gaps ) {
       ret = true;
-      for( auto col : Range(cells.cols()) ) {
-        cells(col,row) = GRAY;
-      }
+      cells.mark(row, GRAY);
     }
   }
   pinned = cells;
   return ret;
+}
+
+tick_t Tetrix::Tick() {
+  if( !_running ) return TICK_NONE;
+
+  switch( _state ) {
+  case TICK_NONE:
+    _state = TICK_NEXT; 
+    pinned.prune(GRAY);
+    break;
+  case TICK_NEXT:
+    _state = TICK_MOVE;
+    if( NO_TETRO == show_shape ) {
+      show_shape = pre_shape;
+      show_point = {2,0};
+      show_rot = SOUTH;
+      Preview();
+    }
+    break;
+  case TICK_MOVE:
+    // TODO: Skip if recent move?
+    _state = TICK_PIN; 
+    if( NO_TETRO != show_shape ) {
+      Move( MOVE_DOWN );
+    }
+    break;
+  case TICK_PIN:
+    _state = TICK_DONE; 
+    if( HIT_BOTTOM == _hit ) {
+      Pin();
+      show_shape = NO_TETRO;
+    }
+    break;
+  case TICK_DONE:
+    _state = TICK_NONE;
+    break;
+  }
+  return _state;
 }
 
 

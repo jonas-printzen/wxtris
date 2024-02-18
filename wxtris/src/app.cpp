@@ -67,11 +67,11 @@ void WXTris::DoCmd( int cmd ) {
 
   switch( cmd ) {
     case CMD_STEP:
-      tetrix.Increment();
+      tetrix.Tick();
       break;
     case CMD_START:
       tetrix.Start();
-      timer.Start(1000);
+      timer.Start(100);
       break;
     case CMD_PAUSE:
       tetrix.Pause( tetrix.Running() );

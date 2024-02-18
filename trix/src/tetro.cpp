@@ -111,6 +111,62 @@ void point_t::place( int16_t dx, int16_t dy ) {
   y += dy;
 }
 
+
+tgrid_t::tgrid_t( size_type columns, size_type rows )  
+  : _cells(columns*rows), _cols(columns), _rows(rows) {
+}
+
+
+void tgrid_t::clear( color_t val ) {
+  for( auto &cell : _cells ) {
+    cell = val;
+  }
+}
+
+void tgrid_t::place( const tetro_t tetro, color_t c ) {
+  for( auto [x,y] : tetro ) {
+    (*this)(x,y) = c;
+  }
+}
+
+int tgrid_t::gaps( coord_t row ) const {
+  int n=0;
+  for( auto col : Range(cols()) ) {
+    if( NOCOLOR == (*this)(col,row) ) ++n;
+  }
+  return n;
+}
+
+void tgrid_t::mark( coord_t row, color_t mark_color ) {
+  for( auto col : Range(cols()) ) {
+    (*this)(col,row) = mark_color;
+  }
+}
+
+void tgrid_t::erase( coord_t row, color_t filler ) {
+  color_t *from = &_cells.at(0);
+  color_t *to   = &_cells.at(_cols);
+
+  // Move everything one line down
+  ::memmove( to, from,   sizeof(color_t) * row * _cols );
+  // Fill line at the top
+  ::memset(from, filler, sizeof(color_t) * _cols);
+}
+
+
+void tgrid_t::prune( color_t mark_color ) {
+  for( auto row : Range(rows()) ) {
+    if( mark_color == (*this)(0,row) ) {
+      erase(row);
+    }
+  }
+}
+
+  void tgrid_t::operator = ( const tgrid_t &other ) {
+    _cells = other._cells;
+  }
+
+
 std::ostream& operator << ( std::ostream&out, hit_t hit ) {
   switch( hit ) {
   case HIT_NONE:   out << "HIT_NONE"; break;
