@@ -1,15 +1,20 @@
 # BACKLOG for WXTris
 
+
+## ON HOLD
+* Scores
+
 ## IN PROGRESS
-* Remove complete lines, and fall
+* Refactor all UI to App...
 
 ## BACKLOG
-* Unit-tests for Tetrix
+* End Of Game
 * Implement proper randomization
-* Scores / End Of Game
 * Center preview better
 
 ## DONE
+* Unit-tests for Tetrix
+* Remove complete lines, and fall
 * User actions
 * Pin and fall
 * Refactor Tetrix from Blocks (state/view)

@@ -1,5 +1,6 @@
-#include <trix/blocks.hpp>
 #include <trix/ranges.hpp>
+
+#include <wxtris/blocks.hpp>
 
 #include <wx/event.h>
 #include <wx/graphics.h>
@@ -8,7 +9,7 @@
 
 #include <array>
 
-namespace trix {
+namespace wxtris {
 
 struct attr_t {
   wxPen   pen;
@@ -132,4 +133,4 @@ wxRect Blocks::GetBlocksRect() {
 
 
 
-} // namespace trix
+} // namespace wxtris

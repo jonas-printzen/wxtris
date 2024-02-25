@@ -1,4 +1,3 @@
-#include <trix/gui.hpp>
 #include <wxtris/app.hpp>
 
 namespace wxtris {
@@ -21,14 +20,51 @@ enum cmd_ids {
   CMD_EXIT
 };
 
-WXTris::WXTris() : GUI("WXTris"), tetrix(10,21), timer(this,CMD_STEP) {}
+WXTris::WXTris() : _name("WxTris"), tetrix(10,21), timer(this,CMD_STEP) {
+  _frame_style = DEFAULT_STYLE;
+}
+
+wxMenu& WXTris::Menu( chars_t title ) {
+  // Make sure we have a menu-bar
+  if( nullptr == _menubar ) {
+    _menubar = new wxMenuBar();
+    _frame->SetMenuBar(_menubar);
+  }
+
+  // Make sure the menu exists
+  string name(title);
+  wxMenu *pMenu=nullptr;
+  if( _menus.contains(name) ) {
+    pMenu = _menus[name];
+  } else {
+    pMenu = new wxMenu();
+    _menubar->Append( pMenu, title.data() );
+    _menus[name] = pMenu;
+  }
+
+  return *pMenu;
+}
+
+wxMenuItem& WXTris::MenuItem( chars_t title, int id, chars_t action ) {
+    wxMenu &menu=Menu(title);
+
+    // Create and insert the entry
+    wxMenuItem *pItem = nullptr;
+    if( action.empty() ) {
+      pItem = menu.Append(id);
+    } else {
+      pItem = menu.Append(id,action.data());
+    }
+
+    return *pItem;
+}
 
 bool WXTris::OnInit() {
   // Let base initialize
-  if( GUI::OnInit() ) {
+  if( wxApp::OnInit() ) {
     std::cout << "WXTris::OnInit() ..." << std::endl;
-
-    CreateStatusBar(3);
+    _frame = new wxFrame( nullptr, wxID_ANY, _name.data(), wxDefaultPosition, wxDefaultSize, _frame_style );
+    _statusbar = _frame->CreateStatusBar( 3 );
 
     panel = new MainPanel(_frame, tetrix);
     panel->buttons->Button( "Start", CMD_START, &WXTris::OnCmd, this );
@@ -36,11 +72,11 @@ bool WXTris::OnInit() {
     panel->buttons->Button( "Stop", CMD_STOP, &WXTris::OnCmd, this );
 
     // To let panel decide main window size
-    wxSizer *psz = new wxBoxSizer(wxHORIZONTAL);
-    psz->Add(panel,1);
-    SetSizerAndFit( psz );
+    _sizer = new wxBoxSizer(wxHORIZONTAL);
+    _sizer->Add(panel,1);
+    _frame->SetSizerAndFit( _sizer );
 
-    Show(true);
+    _frame->Show(true);
 
     Bind( wxEVT_TIMER, &WXTris::OnStep, this );
 

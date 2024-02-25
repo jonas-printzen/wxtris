@@ -5,7 +5,9 @@
 #include <trix/tetrix.hpp>
 #include <wx/wx.h>
 
-namespace trix {
+namespace wxtris {
+
+using namespace trix;
 
 /** @brief Blocks canvas
  *
@@ -45,6 +47,6 @@ private:
   int     _side;  ///< Pixel-size of each block
 };
 
-} // namespace trix
+} // namespace wxtris
 
 #endif  // TRIX_BLOCKS_HDR

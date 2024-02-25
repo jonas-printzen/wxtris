@@ -1,10 +1,10 @@
-#include <trix/buttons.hpp>
+#include <wxtris/buttons.hpp>
 
-namespace trix {
+namespace wxtris {
 
 Buttons::Buttons( wxWindow *p, const wxSize &sz, wxOrientation orient ) 
   : wxPanel(p), _sz(sz) {
   SetSizer( new wxBoxSizer(orient) );
 }
 
-} // namespace trix
+} // namespace wxtris

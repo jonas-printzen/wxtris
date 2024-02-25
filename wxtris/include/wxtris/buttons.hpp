@@ -4,7 +4,9 @@
 #include <trix/types.hpp>
 #include <wx/wx.h>
 
-namespace trix {
+namespace wxtris {
+
+using namespace trix;
 
 class Buttons : public wxPanel {
 public:

@@ -2,8 +2,9 @@
 #define WXTRIS_MAIN_PANEL_HDR
 
 #include <trix/types.hpp>
-#include <trix/blocks.hpp>
-#include <trix/buttons.hpp>
+
+#include <wxtris/blocks.hpp>
+#include <wxtris/buttons.hpp>
 
 namespace wxtris {
 
