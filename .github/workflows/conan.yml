@@ -15,6 +15,9 @@ permissions:
 jobs:
   build:
     runs-on: [Linux,self-hosted]
+    strategy:
+      matrix:
+        architecture: [X64,ARM64]
 
     steps:
     - uses: actions/checkout@v4
