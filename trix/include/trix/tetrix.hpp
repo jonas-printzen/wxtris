@@ -44,6 +44,8 @@ public:
   using size_type = tgrid_t::size_type;
   using coord_t = tgrid_t::coord_t;
 
+  struct score_t { int score; };
+
   Tetrix( size_type cols, size_type rows );
 
   inline bool Running() const { return _running; }
@@ -131,6 +133,7 @@ public:
 
   tgrid_t preview; ///< Next tetro
   tgrid_t cells;   ///< The cells shown
+  score_t score;
 
 protected:
 

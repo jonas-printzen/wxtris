@@ -12,6 +12,9 @@ MainPanel::MainPanel( wxFrame *frame, const Tetrix &tetrix )
   wxSizer *rightSz = new wxBoxSizer( wxVERTICAL );
   topSz->Add(rightSz,1,wxALL, MARGIN );
 
+  score = new Score( this, tetrix.score );
+  rightSz->Add( score, 0, wxALL, 5 );
+
   preview = new Blocks( this, tetrix.preview, 24 );
   rightSz->Add( preview, 0, wxALL, 5 );
 

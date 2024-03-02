@@ -4,6 +4,7 @@
 #include <trix/types.hpp>
 
 #include <wxtris/blocks.hpp>
+#include <wxtris/score.hpp>
 #include <wxtris/buttons.hpp>
 
 namespace wxtris {
@@ -23,6 +24,7 @@ public:
   MainPanel( wxFrame *frame, const Tetrix &tetrix );
 
   Blocks *blocks=nullptr;     ///< The main block for the game
+  Score  *score=nullptr;      ///< Score
   Blocks *preview=nullptr;    ///< Preview of next item
   Buttons *buttons=nullptr;
 };

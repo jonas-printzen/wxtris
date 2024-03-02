@@ -62,7 +62,6 @@ Blocks::Blocks( wxWindow *parent, const tgrid_t &grid, int side )
   SetBackgroundStyle(wxBG_STYLE_PAINT);
   SetBackgroundColour(wxColor(20,20,32));
   Bind( wxEVT_PAINT, &Blocks::OnPaint, this );
-  // Bind( wxEVT_MOTION, &Blocks::OnMouse, this );
 
   wxSize sz = GetBlocksRect().GetSize();
   sz.IncBy(1,1);
