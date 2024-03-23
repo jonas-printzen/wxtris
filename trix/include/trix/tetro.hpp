@@ -149,7 +149,7 @@ public:
   void erase( coord_t row, color_t filler=NOCOLOR );
 
   /** @brief Remove all marked rows */
-  void prune( color_t mark_color );
+  int prune( color_t mark_color );
 
   void operator = ( const tgrid_t &other );
 

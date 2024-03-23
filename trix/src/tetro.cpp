@@ -154,12 +154,15 @@ void tgrid_t::erase( coord_t row, color_t filler ) {
 }
 
 
-void tgrid_t::prune( color_t mark_color ) {
+int tgrid_t::prune( color_t mark_color ) {
+  int count = 0;
   for( auto row : Range(rows()) ) {
     if( mark_color == (*this)(0,row) ) {
       erase(row);
+      ++count;
     }
   }
+  return count;
 }
 
   void tgrid_t::operator = ( const tgrid_t &other ) {

@@ -15,6 +15,10 @@ public:
 
   Score( wxWindow *parent, const score_t &score );
 
+  void OnPaint( wxPaintEvent &evt );
+
+  void DrawText();
+
   const score_t &score;
 };
 

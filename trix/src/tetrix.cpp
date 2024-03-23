@@ -15,6 +15,7 @@ Tetrix::Tetrix( size_type cols, size_type rows )
 void Tetrix::Start() {
   _running = true;
   show_point = {0,0};
+  score.score = 0;
   Preview();
 }
 
@@ -165,7 +166,7 @@ tick_t Tetrix::Tick() {
   switch( _state ) {
   case TICK_NONE:
     _state = TICK_NEXT; 
-    pinned.prune(GRAY);
+    score.score += 10*pinned.prune(GRAY);
     break;
   case TICK_NEXT:
     _state = TICK_MOVE;

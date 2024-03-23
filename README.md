@@ -11,7 +11,7 @@ So, WXTrix, not proper Tetris, just my own for-fun-project.
 
 The actual game-logic in class Tetrix, viewed by simple and straight forward wxWidgets frontend for now. Maybe I'l implement something console-only in future to assert proper separation.
 
-Still only basic playable, no scores is work in progress. Planning to introduce some event-system to support logging and scanners for patterns in the grid. This is to support different approach to self-playing using different kind of AI approaches. Not there yet though...
+Still only basic playable, scores is work in progress. Planning to introduce some event-system to support logging and scanners for patterns in the grid. This is to support different approach to self-playing using different kind of AI approaches. Not there yet though...
 
 ## Builds
 

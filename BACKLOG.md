@@ -2,15 +2,15 @@
 
 
 ## ON HOLD
-* Scores
 
 ## IN PROGRESS
-* Refactor all UI to App...
+* Scores
 
 ## BACKLOG
 * End Of Game
 * Implement proper randomization
 * Center preview better
+* Consider redesign to fully event-driven
 
 ## DONE
 * Unit-tests for Tetrix
